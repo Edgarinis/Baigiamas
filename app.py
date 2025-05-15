@@ -1,20 +1,32 @@
 from flask import Flask, render_template, Response
+from ultralytics import YOLO
 import cv2
 
 app = Flask(__name__)
-camera = cv2.VideoCapture(0)  # 0 for default webcam
 
+# Load trained model
+model = YOLO(r'C:\Users\cedga\Desktop\Baigiamas\runs\detect\train9\weights\best.pt')
+
+# Webcam video generator
 def generate_frames():
+    cap = cv2.VideoCapture(0)  # Webcam
     while True:
-        success, frame = camera.read()
+        success, frame = cap.read()
         if not success:
             break
-        else:
-            # (later we'll add detection here)
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+        # Run YOLOv8 inference
+        results = model(frame, conf =0.5)
+        annotated_frame = results[0].plot()
+
+        # Encode frame as JPEG
+        _, buffer = cv2.imencode('.jpg', annotated_frame)
+        frame_bytes = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+    cap.release()
 
 @app.route('/')
 def index():

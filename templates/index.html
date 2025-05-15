@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>PPE Detection</title>
+    <meta charset="UTF-8">
+    <title>YOLOv8 Real-Time Detection</title>
+    <style>
+        body { text-align: center; font-family: Arial; background: #f0f0f0; }
+        h1 { color: #333; }
+        img { border: 2px solid #333; border-radius: 10px; }
+    </style>
 </head>
 <body>
-    <h1>Real-Time PPE Detection</h1>
-    <img src="{{ url_for('video_feed') }}" width="640" height="480">
+    <h1>YOLOv8 Live Object Detection</h1>
+    <img src="{{ url_for('video_feed') }}" width="720" height="540">
 </body>
 </html>

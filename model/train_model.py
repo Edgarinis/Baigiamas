@@ -20,7 +20,7 @@ def main():
     # Train using GPU (device=0)
     results = model.train(
         data=config_path,
-        epochs=10,
+        epochs=50,
         device=0
     )
 
