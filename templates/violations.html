@@ -2,25 +2,156 @@
 <html>
 <head>
     <title>Logged Safety Violations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #333;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 960px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #search {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .high-confidence {
+            background-color: #e1f7e7;
+            color: #155724;
+        }
+
+        .low-confidence {
+            background-color: #fbeaea;
+            color: #721c24;
+        }
+
+        /* Column widths */
+        .id-col { width: 60px; }
+        .timestamp-col { width: 180px; }
+        .label-col { width: 140px; }
+        .confidence-col { width: 100px; }
+    </style>
 </head>
 <body>
-    <h1>Violation History</h1>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>Timestamp</th>
-            <th>Label</th>
-            <th>Confidence</th>
-        </tr>
-        {% for row in rows %}
-        <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ '{:.2f}'.format(row[3]) }}</td>
-        </tr>
-        {% endfor %}
-    </table>
-    <p><a href="{{ url_for('index') }}">Back to Live Feed</a></p>
+    <div class="navbar">
+        <a href="{{ url_for('index') }}">← Back to Live Feed</a>
+    </div>
+
+    <div class="container">
+        <h1>Violation History</h1>
+        <input type="text" id="search" placeholder="Search label or timestamp..." onkeyup="filterTable()">
+
+        <table id="violationsTable">
+            <thead>
+                <tr>
+                    <th class="id-col" onclick="sortTable(0)">ID ▲</th>
+                    <th class="timestamp-col" onclick="sortTable(1)">Timestamp</th>
+                    <th class="label-col" onclick="sortTable(2)">Label</th>
+                    <th class="confidence-col" onclick="sortTable(3)">Confidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr class="{{ 'high-confidence' if row[3] > 0.8 else 'low-confidence' }}">
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ '{:.2f}'.format(row[3]) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function filterTable() {
+            const input = document.getElementById('search').value.toLowerCase();
+            const rows = document.querySelectorAll('#violationsTable tbody tr');
+            rows.forEach(row => {
+                const label = row.children[2].textContent.toLowerCase();
+                const timestamp = row.children[1].textContent.toLowerCase();
+                row.style.display = (label.includes(input) || timestamp.includes(input)) ? '' : 'none';
+            });
+        }
+
+        let sortAsc = true;
+        function sortTable(colIndex) {
+            const table = document.getElementById('violationsTable');
+            const rows = Array.from(table.rows).slice(1); // skip header
+            rows.sort((a, b) => {
+                const valA = a.cells[colIndex].innerText;
+                const valB = b.cells[colIndex].innerText;
+
+                // Numeric sort if it's confidence
+                if (colIndex === 0 || colIndex === 3) {
+                    return sortAsc ? valA - valB : valB - valA;
+                } else {
+                    return sortAsc
+                        ? valA.localeCompare(valB)
+                        : valB.localeCompare(valA);
+                }
+            });
+            sortAsc = !sortAsc;
+
+            // Append rows in sorted order
+            const tbody = table.tBodies[0];
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
 </body>
 </html>
