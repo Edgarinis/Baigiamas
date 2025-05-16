@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logged Safety Violations</title>
+</head>
+<body>
+    <h1>Violation History</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Timestamp</th>
+            <th>Label</th>
+            <th>Confidence</th>
+        </tr>
+        {% for row in rows %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ '{:.2f}'.format(row[3]) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p><a href="{{ url_for('index') }}">Back to Live Feed</a></p>
+</body>
+</html>

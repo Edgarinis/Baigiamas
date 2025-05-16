@@ -1,6 +1,6 @@
-path: C:\Users\cedga\Desktop\Baigiamo_duomenys\150mb
-train: train\images
-val: valid\images
+path: C:\Users\cedga\Desktop\Baigiamo_duomenys\merged_dataset
+train: images\train
+val: images\valid
 
 names:
   0: 'Hardhat'

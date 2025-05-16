@@ -12,16 +12,22 @@ import os
 
 def main():
     # Load the model (can be from .yaml or .pt file)
-    model = YOLO('yolov8n.yaml')  # or use 'yolov8n.pt' for pretrained
+    model = YOLO('yolov8s.yaml')  # or use 'yolov8n.pt' for pretrained
 
     # Absolute path to your config (optional but safer)
     config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
 
     # Train using GPU (device=0)
     results = model.train(
-        data=config_path,
-        epochs=50,
-        device=0
+    data=config_path,
+    epochs=60,
+    batch=16,
+    imgsz=640,
+    optimizer='AdamW',
+    lr0=0.001,
+    patience=15,
+    device=0
+    augment=True
     )
 
 if __name__ == '__main__':
