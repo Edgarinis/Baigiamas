@@ -38,13 +38,20 @@
             margin-bottom: 20px;
         }
 
-        #search {
-            width: 100%;
-            padding: 8px 10px;
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-bottom: 15px;
+        }
+
+        .filters input {
+            padding: 6px 10px;
             font-size: 14px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        }
+
+        .filters label {
+            font-weight: bold;
         }
 
         table {
@@ -94,7 +101,17 @@
 
     <div class="container">
         <h1>Violation History</h1>
-        <input type="text" id="search" placeholder="Search label or timestamp..." onkeyup="filterTable()">
+
+        <div class="filters">
+            <label for="search">Search:</label>
+            <input type="text" id="search" placeholder="Label or timestamp" onkeyup="filterTable()">
+
+            <label for="dateFilter">Date:</label>
+            <input type="date" id="dateFilter" onchange="filterTable()">
+
+            <label for="confidenceFilter">Min Confidence:</label>
+            <input type="number" id="confidenceFilter" step="0.01" min="0" max="1" value="0" onchange="filterTable()">
+        </div>
 
         <table id="violationsTable">
             <thead>
@@ -120,12 +137,21 @@
 
     <script>
         function filterTable() {
-            const input = document.getElementById('search').value.toLowerCase();
+            const search = document.getElementById('search').value.toLowerCase();
+            const date = document.getElementById('dateFilter').value;
+            const minConfidence = parseFloat(document.getElementById('confidenceFilter').value) || 0;
+
             const rows = document.querySelectorAll('#violationsTable tbody tr');
             rows.forEach(row => {
                 const label = row.children[2].textContent.toLowerCase();
-                const timestamp = row.children[1].textContent.toLowerCase();
-                row.style.display = (label.includes(input) || timestamp.includes(input)) ? '' : 'none';
+                const timestamp = row.children[1].textContent;
+                const confidence = parseFloat(row.children[3].textContent);
+
+                const matchesSearch = label.includes(search) || timestamp.includes(search);
+                const matchesDate = !date || timestamp.startsWith(date);
+                const matchesConfidence = confidence >= minConfidence;
+
+                row.style.display = (matchesSearch && matchesDate && matchesConfidence) ? '' : 'none';
             });
         }
 
@@ -137,7 +163,6 @@
                 const valA = a.cells[colIndex].innerText;
                 const valB = b.cells[colIndex].innerText;
 
-                // Numeric sort if it's confidence
                 if (colIndex === 0 || colIndex === 3) {
                     return sortAsc ? valA - valB : valB - valA;
                 } else {
@@ -147,8 +172,6 @@
                 }
             });
             sortAsc = !sortAsc;
-
-            // Append rows in sorted order
             const tbody = table.tBodies[0];
             rows.forEach(row => tbody.appendChild(row));
         }
