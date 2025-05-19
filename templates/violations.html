@@ -87,11 +87,18 @@
             color: #721c24;
         }
 
+        .snapshot-img {
+            width: 80px;
+            height: auto;
+            border-radius: 4px;
+        }
+
         /* Column widths */
         .id-col { width: 60px; }
-        .timestamp-col { width: 180px; }
-        .label-col { width: 140px; }
+        .timestamp-col { width: 160px; }
+        .label-col { width: 120px; }
         .confidence-col { width: 100px; }
+        .snapshot-col { width: 100px; }
     </style>
 </head>
 <body>
@@ -120,6 +127,7 @@
                     <th class="timestamp-col" onclick="sortTable(1)">Timestamp</th>
                     <th class="label-col" onclick="sortTable(2)">Label</th>
                     <th class="confidence-col" onclick="sortTable(3)">Confidence</th>
+                    <th class="snapshot-col">Snapshot</th>
                 </tr>
             </thead>
             <tbody>
@@ -129,6 +137,15 @@
                     <td>{{ row[1] }}</td>
                     <td>{{ row[2] }}</td>
                     <td>{{ '{:.2f}'.format(row[3]) }}</td>
+                    <td>
+                        {% if row[4] %}
+                        <a href="{{ url_for('static', filename='snapshots/' ~ row[4].split('snapshots/')[-1]) }}" target="_blank">
+                            <img src="{{ url_for('static', filename='snapshots/' ~ row[4].split('snapshots/')[-1]) }}" class="snapshot-img">
+                        </a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
