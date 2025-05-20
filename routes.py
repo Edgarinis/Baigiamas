@@ -92,3 +92,33 @@ def configure_routes(app):
     def stop_stream():
         config.STREAM_ACTIVE = False
         return ('', 204)
+    @app.route('/process_video', methods=['POST'])
+    def process_video():
+        file = request.files.get('video_file')
+        if not file or file.filename == '':
+            return redirect(url_for('index'))
+
+        # 1) Save to your UPLOAD_FOLDER
+        ts       = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        filename = f"video_{ts}.mp4"
+        savepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        file.save(savepath)
+
+        # 2) Flip the source + start streaming immediately
+        config.VIDEO_SOURCE  = savepath
+        config.STREAM_ACTIVE = True
+
+        # 3) Gather dashboard context as usual
+        total, top_label, top_count = get_violations_summary()
+        dist    = get_class_distribution()
+        recent  = get_latest_violation()
+
+        # 4) Render index.html with a flag to auto-kick off the stream
+        return render_template('index.html',
+            video_mode=True,
+            total_violations    = total,
+            top_violation_label = top_label,
+            top_violation_count = top_count,
+            class_distribution  = dist,
+            recent_snapshot     = recent
+        )

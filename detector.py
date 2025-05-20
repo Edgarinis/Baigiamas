@@ -37,7 +37,8 @@ def generate_frames():
 
         # 2) Lazy-open the camera only once streaming turns on
         if cap is None:
-            cap = cv2.VideoCapture(0)
+            source = config.VIDEO_SOURCE
+            cap = cv2.VideoCapture(source, cv2.CAP_ANY)
         success, frame = cap.read()
         if not success:
             break

@@ -197,6 +197,19 @@
                   </div>
                   {% endif %}
               </div>
+              <div class="section">
+                <h3>Upload a Video for Detection</h3>
+                <form id="video-upload-form"
+                      action="{{ url_for('process_video') }}"
+                      method="post"
+                      enctype="multipart/form-data">
+                  <input type="file"
+                         name="video_file"
+                         accept="video/*"
+                         required>
+                  <button type="submit">Start Video</button>
+                </form>
+              </div>
           </div>
 
           <!-- Dashboard -->
@@ -278,7 +291,14 @@
               headers: { 'Content-Type':'application/json' },
               body: JSON.stringify({ classes: selected })
           });
+      
       }));
+
   </script>
+  {% if video_mode %}
+  <script>
+    document.addEventListener('DOMContentLoaded', () => { startWebcam(); });
+  </script>
+  {% endif %}
 </body>
 </html>
