@@ -1,66 +1,36 @@
+from ultralytics import YOLO
+import torch
 import os
-import numpy as np
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
-from tensorflow.keras.optimizers import Adam
 
-# Define image parameters
-IMG_HEIGHT = 150
-IMG_WIDTH = 150
-BATCH_SIZE = 32
-EPOCHS = 10  # You can increase this
 
-# Define dataset path
-TRAIN_DIR = 'data/train'
-VAL_DIR = 'data/val'
+# print(torch.cuda.is_available())  # Check if CUDA is available
+# print(torch.cuda.get_device_name(0))  # Print the current CUDA device
 
-# Data augmentation and preprocessing
-train_datagen = ImageDataGenerator(rescale=1./255)
-val_datagen = ImageDataGenerator(rescale=1./255)
+# model = YOLO('yolov8n.yaml')  # Load a pretrained YOLOv8 model
 
-train_gen = train_datagen.flow_from_directory(
-    TRAIN_DIR,
-    target_size=(IMG_HEIGHT, IMG_WIDTH),
-    batch_size=BATCH_SIZE,
-    class_mode='categorical'
-)
+# results = model.train(data='model\config.yaml', epochs=10, device = 0)  # Train the model on the dataset
 
-val_gen = val_datagen.flow_from_directory(
-    VAL_DIR,
-    target_size=(IMG_HEIGHT, IMG_WIDTH),
-    batch_size=BATCH_SIZE,
-    class_mode='categorical'
-)
+def main():
+    # Load the model (can be from .yaml or .pt file)
+    model = YOLO('yolov8s.yaml')  # or use 'yolov8n.pt' for pretrained
 
-# CNN model
-model = Sequential([
-    Conv2D(32, (3, 3), activation='relu', input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
-    MaxPooling2D(2, 2),
+    # Absolute path to your config (optional but safer)
+    config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
 
-    Conv2D(64, (3, 3), activation='relu'),
-    MaxPooling2D(2, 2),
+    # Train using GPU (device=0)
+    results = model.train(
+    data=config_path,
+    epochs=60,
+    batch=16,
+    imgsz=640,
+    optimizer='AdamW',
+    lr0=0.001,
+    patience=15,
+    device=0
+    augment=True
+    )
 
-    Conv2D(128, (3, 3), activation='relu'),
-    MaxPooling2D(2, 2),
-
-    Flatten(),
-    Dense(128, activation='relu'),
-    Dropout(0.5),
-    Dense(train_gen.num_classes, activation='softmax')
-])
-
-# Compile the model
-model.compile(optimizer=Adam(),
-              loss='categorical_crossentropy',
-              metrics=['accuracy'])
-
-# Train the model
-model.fit(
-    train_gen,
-    validation_data=val_gen,
-    epochs=EPOCHS
-)
-
-# Save the trained model
-model.save('model/ppe_cnn_model.h5')
+if __name__ == '__main__':
+    import multiprocessing
+    multiprocessing.freeze_support()  # helps on Windows
+    main()

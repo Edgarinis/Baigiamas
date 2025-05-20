@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logged Safety Violations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            margin: 0;
+        }
+
+        .navbar {
+            background-color: #333;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 960px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .filters input {
+            padding: 6px 10px;
+            font-size: 14px;
+        }
+
+        .filters label {
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        th {
+            background-color: #333;
+            color: white;
+            cursor: pointer;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .high-confidence {
+            background-color: #e1f7e7;
+            color: #155724;
+        }
+
+        .low-confidence {
+            background-color: #fbeaea;
+            color: #721c24;
+        }
+
+        .snapshot-img {
+            width: 80px;
+            height: auto;
+            border-radius: 4px;
+        }
+
+        /* Column widths */
+        .id-col { width: 60px; }
+        .timestamp-col { width: 160px; }
+        .label-col { width: 120px; }
+        .confidence-col { width: 100px; }
+        .snapshot-col { width: 100px; }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="{{ url_for('index') }}">← Back to Live Feed</a>
+    </div>
+
+    <div class="container">
+        <h1>Violation History</h1>
+
+        <div class="filters">
+            <label for="search">Search:</label>
+            <input type="text" id="search" placeholder="Label or timestamp" onkeyup="filterTable()">
+
+            <label for="dateFilter">Date:</label>
+            <input type="date" id="dateFilter" onchange="filterTable()">
+
+            <label for="confidenceFilter">Min Confidence:</label>
+            <input type="number" id="confidenceFilter" step="0.01" min="0" max="1" value="0" onchange="filterTable()">
+        </div>
+
+        <table id="violationsTable">
+            <thead>
+                <tr>
+                    <th class="id-col" onclick="sortTable(0)">ID ▲</th>
+                    <th class="timestamp-col" onclick="sortTable(1)">Timestamp</th>
+                    <th class="label-col" onclick="sortTable(2)">Label</th>
+                    <th class="confidence-col" onclick="sortTable(3)">Confidence</th>
+                    <th class="snapshot-col">Snapshot</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr class="{{ 'high-confidence' if row[3] > 0.8 else 'low-confidence' }}">
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ '{:.2f}'.format(row[3]) }}</td>
+                    <td>
+                        {% if row[4] %}
+                        <a href="{{ url_for('static', filename='snapshots/' ~ row[4].split('snapshots/')[-1]) }}" target="_blank">
+                            <img src="{{ url_for('static', filename='snapshots/' ~ row[4].split('snapshots/')[-1]) }}" class="snapshot-img">
+                        </a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        function filterTable() {
+            const search = document.getElementById('search').value.toLowerCase();
+            const date = document.getElementById('dateFilter').value;
+            const minConfidence = parseFloat(document.getElementById('confidenceFilter').value) || 0;
+
+            const rows = document.querySelectorAll('#violationsTable tbody tr');
+            rows.forEach(row => {
+                const label = row.children[2].textContent.toLowerCase();
+                const timestamp = row.children[1].textContent;
+                const confidence = parseFloat(row.children[3].textContent);
+
+                const matchesSearch = label.includes(search) || timestamp.includes(search);
+                const matchesDate = !date || timestamp.startsWith(date);
+                const matchesConfidence = confidence >= minConfidence;
+
+                row.style.display = (matchesSearch && matchesDate && matchesConfidence) ? '' : 'none';
+            });
+        }
+
+        let sortAsc = true;
+        function sortTable(colIndex) {
+            const table = document.getElementById('violationsTable');
+            const rows = Array.from(table.rows).slice(1); // skip header
+            rows.sort((a, b) => {
+                const valA = a.cells[colIndex].innerText;
+                const valB = b.cells[colIndex].innerText;
+
+                if (colIndex === 0 || colIndex === 3) {
+                    return sortAsc ? valA - valB : valB - valA;
+                } else {
+                    return sortAsc
+                        ? valA.localeCompare(valB)
+                        : valB.localeCompare(valA);
+                }
+            });
+            sortAsc = !sortAsc;
+            const tbody = table.tBodies[0];
+            rows.forEach(row => tbody.appendChild(row));
+        }
+    </script>
+</body>
+</html>
