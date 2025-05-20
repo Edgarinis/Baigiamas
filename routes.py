@@ -2,28 +2,24 @@ from flask import render_template, Response, request, redirect, url_for, jsonify
 from detector import generate_frames
 from db import get_violations, log_violation, get_violations_summary, get_class_distribution, get_latest_violation
 from ultralytics import YOLO
-import os
-import datetime
-import json
+import os, datetime, json, config
 
 model = YOLO(r'C:\Users\cedga\Desktop\Baigiamas\runs\detect\train17\weights\best.pt')
 
 VIOLATION_CLASSES = ['NO-Hardhat', 'NO-Mask', 'NO-Safety Vest']
 active_violation_filters = set(VIOLATION_CLASSES)
 
-
 def configure_routes(app):
     @app.route('/')
     def index():
-        total_violations, top_label, top_count = get_violations_summary()
-        class_dist = get_class_distribution()
+        total, top_label, top_count = get_violations_summary()
+        dist = get_class_distribution()
         recent = get_latest_violation()
-
         return render_template('index.html',
-            total_violations=total_violations,
+            total_violations=total,
             top_violation_label=top_label,
             top_violation_count=top_count,
-            class_distribution=class_dist,
+            class_distribution=dist,
             recent_snapshot=recent
         )
 
@@ -40,47 +36,39 @@ def configure_routes(app):
     def detect_image():
         if 'image' not in request.files:
             return redirect(url_for('index'))
-
         file = request.files['image']
         if file.filename == '':
             return redirect(url_for('index'))
 
-        # Save upload and run detection
-        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        filename = f"img_{timestamp}.jpg"
-        upload_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        result_path = os.path.join(current_app.config['RESULT_FOLDER'], filename)
-        file.save(upload_path)
+        ts = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        fname = f"img_{ts}.jpg"
+        up = os.path.join(current_app.config['UPLOAD_FOLDER'], fname)
+        res = os.path.join(current_app.config['RESULT_FOLDER'], fname)
+        file.save(up)
 
-        results = model(upload_path, conf=0.3)
-        results[0].save(filename=result_path)
+        results = model(up, conf=0.3)
+        results[0].save(filename=res)
 
-        # Log first violation if found
-        labels = results[0].names
-        boxes = results[0].boxes.data.tolist()
-        found = None
-        for box in boxes:
-            class_id = int(box[5])
-            confidence = box[4]
-            label = labels[class_id]
-            if label in VIOLATION_CLASSES:
-                found = (label, confidence)
+        # log first violation
+        for box in results[0].boxes.data.tolist():
+            cls, conf = int(box[5]), box[4]
+            lbl = results[0].names[cls]
+            if lbl in VIOLATION_CLASSES:
+                rel = os.path.relpath(res,'static').replace('\\','/')
+                log_violation(lbl, float(conf), rel)
                 break
-        if found:
-            rel_path = os.path.relpath(result_path, start='static').replace('\\', '/')
-            log_violation(found[0], found[1], rel_path)
 
-        # Prepare dashboard data
-        total_violations, top_label, top_count = get_violations_summary()
-        class_dist = get_class_distribution()
+        # re-gather dashboard
+        total, top_label, top_count = get_violations_summary()
+        dist = get_class_distribution()
         recent = get_latest_violation()
 
         return render_template('index.html',
-            result_image=filename,
-            total_violations=total_violations,
+            result_image=fname,
+            total_violations=total,
             top_violation_label=top_label,
             top_violation_count=top_count,
-            class_distribution=class_dist,
+            class_distribution=dist,
             recent_snapshot=recent
         )
 
@@ -91,9 +79,16 @@ def configure_routes(app):
     @app.route('/set_active_classes', methods=['POST'])
     def set_active_classes():
         global active_violation_filters
-        try:
-            data = json.loads(request.data)
-            active_violation_filters = set(data.get('classes', VIOLATION_CLASSES))
-            return '', 204
-        except Exception as e:
-            return str(e), 400
+        data = json.loads(request.data)
+        active_violation_filters = set(data.get('classes', VIOLATION_CLASSES))
+        return '', 204
+    
+    @app.route('/start_stream', methods=['POST'])
+    def start_stream():
+        config.STREAM_ACTIVE = True
+        return ('', 204)
+
+    @app.route('/stop_stream', methods=['POST'])
+    def stop_stream():
+        config.STREAM_ACTIVE = False
+        return ('', 204)

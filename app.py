@@ -4,6 +4,8 @@ from routes import configure_routes
 import os
 
 app = Flask(__name__)
+app.config['VIDEO_SOURCE'] = 0
+app.config['STREAM_ACTIVE'] = False    # ← new
 
 # Configure paths for image handling
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
