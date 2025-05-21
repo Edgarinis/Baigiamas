@@ -1,18 +1,45 @@
 <!DOCTYPE html>
-<html>
-<head><title>Register</title></head>
-<body>
-  <h2>Register</h2>
-  <form method="post">
-    {{ form.hidden_tag() }}
-    {{ form.username.label }} {{ form.username() }}<br>
-    {% for e in form.username.errors %}<span style="color:red">{{ e }}</span><br>{% endfor %}
-    {{ form.password.label }} {{ form.password() }}<br>
-    {% for e in form.password.errors %}<span style="color:red">{{ e }}</span><br>{% endfor %}
-    {{ form.confirm.label }}  {{ form.confirm() }}<br>
-    {% for e in form.confirm.errors  %}<span style="color:red">{{ e }}</span><br>{% endfor %}
-    {{ form.submit() }}
-  </form>
-  <a href="{{ url_for('login') }}">Already have an account? Log in</a>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="auth-page">
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Register</h2>
+
+      <form method="post">
+        {{ form.hidden_tag() }}
+
+        <label for="{{ form.username.id }}">Username</label>
+        {{ form.username(id=form.username.id, size=32, placeholder="Choose a username") }}
+        {% for err in form.username.errors %}
+          <div class="flash danger">{{ err }}</div>
+        {% endfor %}
+
+        <label for="{{ form.password.id }}">Password</label>
+        {{ form.password(id=form.password.id, size=32, placeholder="Choose a password") }}
+        {% for err in form.password.errors %}
+          <div class="flash danger">{{ err }}</div>
+        {% endfor %}
+
+        <label for="{{ form.confirm.id }}">Confirm Password</label>
+        {{ form.confirm(id=form.confirm.id, size=32, placeholder="Repeat your password") }}
+        {% for err in form.confirm.errors %}
+          <div class="flash danger">{{ err }}</div>
+        {% endfor %}
+
+        {{ form.submit(class="button", value="Register") }}
+      </form>
+
+      <div class="alt-action">
+        Already have an account? <a href="{{ url_for('login') }}">Log In</a>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
