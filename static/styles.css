@@ -1,0 +1,279 @@
+  /*****************************Login/register page*****************************************/
+  .auth-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 24px;
+    max-width: 400px;
+    margin: 80px auto;
+  }
+  
+  /* Page container (similar to your index “.container”) */
+  .auth-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    padding-top: 40px;
+  }
+  
+  /* Headings */
+  .auth-card h2 {
+    margin-top: 0;
+    margin-bottom: 24px;
+    font-size: 28px;
+    color: #212529;
+    text-align: center;
+  }
+  
+  /* Form inputs */
+  .auth-card input[type="text"],
+  .auth-card input[type="password"],
+  .auth-card input[type="email"] {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 16px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+  }
+  
+  /* Buttons (same as .button in your index) */
+  .auth-card .button {
+    display: block;
+    width: 100%;
+    padding: 10px 0;
+    font-size: 16px;
+    background-color: #0d6efd;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    margin-top: 8px;
+  }
+  .auth-card .button:hover {
+    background-color: #0b5ed7;
+  }
+  
+  /* Flash messages */
+  .flash {
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
+  .flash.success { background: #d1e7dd; color: #0f5132; }
+  .flash.danger  { background: #f8d7da; color: #842029; }
+  
+  /* Alternate action link */
+  .auth-card .alt-action {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+  }
+  .auth-card .alt-action a {
+    color: #0d6efd;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .auth-card .alt-action a:hover {
+    text-decoration: underline;
+  }
+  body.auth-page {
+    display: flex;                /* override index’s body:flex if needed */
+    justify-content: center;      /* center horizontally */
+    align-items: center;          /* center vertically */
+    min-height: 100vh;            /* full screen */
+    background: linear-gradient(
+      135deg,
+      #667eea 0%,
+      #764ba2 100%
+    );                             /* cool purple gradient */
+  }
+  
+  /* Tweak your card so it’s not pushed down */
+  body.auth-page .auth-card {
+    margin: 0;                     /* remove any top margin */
+  }
+  
+  /* Optional: make the placeholder text a little darker for contrast */
+  body.auth-page .auth-card input::placeholder {
+    color: #6c757d;
+  }
+  /*****************************Index page*****************************************/
+    body {
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        display: flex;
+        background-color: #f8f9fa;
+    }
+    .sidebar {
+        width: 220px;
+        height: 100vh;
+        background-color: #212529;
+        color: white;
+        padding: 20px;
+        box-sizing: border-box;
+        position: fixed;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+    .sidebar a.button {
+        background-color: #0d6efd;
+        color: white;
+        padding: 10px 15px;
+        text-decoration: none;
+        text-align: center;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    .sidebar a.button:hover {
+        background-color: #0b5ed7;
+    }
+    .sidebar label {
+        display: block;
+        margin-top: 10px;
+        font-size: 14px;
+    }
+    .sidebar .user-info {
+    margin-bottom: 20px;
+    }
+    .sidebar .user-info .username {
+    display: block;
+    color: #ccc;
+    margin-bottom: 8px;
+    font-size: 14px;
+    }
+    .sidebar .button.logout {
+    /* make sure the text never wraps */
+    white-space: nowrap;
+    /* bump it full-width to match other buttons, or size to content */
+    width: 100%;
+    text-align: center;
+    padding: 8px 15px;
+    }
+    .container {
+        margin-left: 240px;
+        padding: 40px;
+        width: calc(100% - 240px);
+    }
+    h1 {
+        text-align: center;
+        color: #212529;
+        margin-bottom: 30px;
+    }
+    .main-content {
+        display: flex;
+        gap: 40px;
+        align-items: flex-start;
+    }
+    .webcam-section {
+        width: 640px;
+    }
+    #video-container {
+        width: 640px;
+        height: 480px;
+        background-color: #dee2e6;
+        border: 2px dashed #adb5bd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: #495057;
+        border-radius: 8px;
+    }
+    #video-container img {
+        max-height: 100%;
+        max-width: 100%;
+        border-radius: 8px;
+    }
+    .dashboard {
+        width: 640px;
+        height: 480px;
+        background: white;
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin-top: 100px;
+    }
+    .dashboard-summary {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    .dashboard-summary div {
+        background-color: #f1f3f5;
+        border-radius: 8px;
+        padding: 12px;
+        width: 48%;
+        text-align: center;
+    }
+    .dashboard-summary h2 {
+        margin: 0;
+        font-size: 26px;
+        color: #0d6efd;
+        white-space: nowrap;
+    }
+    .dashboard-summary p {
+        margin: 4px 0 0;
+        color: #495057;
+        font-size: 14px;
+    }
+    .counts-per-class {
+        margin-bottom:16px;
+    }
+    .counts-per-class ul {
+        list-style:none;
+        padding:0;
+    }
+    .counts-per-class li {
+        padding:4px 0;
+    }
+    /* Recent violation table */
+    #recent-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+    }
+    #recent-table th, #recent-table td {
+        border: 1px solid #dee2e6;
+        padding: 8px;
+        text-align: center;
+    }
+    #recent-table th {
+        background-color: #f1f3f5;
+        font-weight: bold;
+    }
+    .section {
+        margin-top: 30px;
+    }
+    form {
+        margin-top: 10px;
+    }
+    input[type="file"] {
+        margin-bottom: 10px;
+    }
+    button {
+        padding: 8px 16px;
+        margin-right: 10px;
+        font-size: 14px;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    button:hover {
+        background-color: #0b5ed7;
+    }
+    #uploaded-image, #detection-result {
+        display: block;
+        margin-top: 10px;
+    }

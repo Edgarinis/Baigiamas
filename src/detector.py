@@ -1,6 +1,6 @@
 import cv2, time, datetime, os, requests, config
 from ultralytics import YOLO
-from db import log_violation
+from src.db import log_violation
 from flask import current_app
 import numpy as np
 
