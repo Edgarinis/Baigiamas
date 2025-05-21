@@ -1,21 +1,43 @@
 <!DOCTYPE html>
-<html>
-<head><title>Login</title></head>
-<body>
-  <h2>Login</h2>
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% for cat,msg in messages %}
-      <div class="flash {{cat}}">{{msg}}</div>
-    {% endfor %}
-  {% endwith %}
-  <form method="post">
-    {{ form.hidden_tag() }}
-    {{ form.username.label }} {{ form.username() }}<br>
-    {% for e in form.username.errors %}<span style="color:red">{{ e }}</span><br>{% endfor %}
-    {{ form.password.label }} {{ form.password() }}<br>
-    {% for e in form.password.errors %}<span style="color:red">{{ e }}</span><br>{% endfor %}
-    {{ form.submit() }}
-  </form>
-  <a href="{{ url_for('register') }}">Need an account? Register</a>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Log In</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class ="auth-page">
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>Log In</h2>
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div class="flash {{cat}}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="post">
+        {{ form.hidden_tag() }}
+        <label for="{{ form.username.id }}">Username</label>
+  {{ form.username(id=form.username.id, size=32, placeholder="Enter your username") }}
+        {% for err in form.username.errors %}
+          <div class="flash danger">{{ err }}</div>
+        {% endfor %}
+
+        <label for="{{ form.password.id }}">Password</label>
+  {{ form.password(id=form.password.id, size=32, placeholder="Enter your password") }}
+        {% for err in form.password.errors %}
+          <div class="flash danger">{{ err }}</div>
+        {% endfor %}
+
+        {{ form.submit(class="button", value="Log In") }}
+      </form>
+
+      <div class="alt-action">
+        Don't have an account? <a href="{{ url_for('register') }}">Register</a>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

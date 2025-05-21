@@ -1,8 +1,8 @@
 import os
 
 from flask import Flask
-from flask_login import LoginManager, UserMixin
-
+from flask_login import LoginManager
+from config import User
 from src.db import init_db, get_user_by_id
 from src.routes import configure_routes
 
@@ -32,8 +32,6 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'  # redirect here if not logged in
 
-class User(UserMixin):
-    pass
 
 @login_manager.user_loader
 def load_user(user_id):

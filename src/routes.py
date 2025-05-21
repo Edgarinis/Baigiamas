@@ -2,6 +2,7 @@ from flask import render_template, Response, request, redirect, url_for, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from src.detector import generate_frames
 from src.forms import RegistrationForm, LoginForm
+from config import User
 from src.db import verify_user, add_user, get_user_by_username, get_violations_summary, get_class_distribution, get_latest_violation, get_violations, log_violation
 from ultralytics import YOLO
 import os, datetime, json, config
@@ -13,6 +14,7 @@ active_violation_filters = set(VIOLATION_CLASSES)
 
 def configure_routes(app):
     @app.route('/')
+    @login_required
     def index():
         total, top_label, top_count = get_violations_summary()
         dist = get_class_distribution()
@@ -26,15 +28,18 @@ def configure_routes(app):
         )
 
     @app.route('/video_feed')
+    @login_required
     def video_feed():
         return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
     @app.route('/violations')
+    @login_required
     def violations():
         rows = get_violations()
         return render_template('violations.html', rows=rows)
 
     @app.route('/detect_image', methods=['POST'])
+    @login_required
     def detect_image():
         if 'image' not in request.files:
             return redirect(url_for('index'))
@@ -75,10 +80,12 @@ def configure_routes(app):
         )
 
     @app.route('/get_active_classes')
+    @login_required
     def get_active_classes():
         return jsonify(list(active_violation_filters))
 
     @app.route('/set_active_classes', methods=['POST'])
+    @login_required
     def set_active_classes():
         global active_violation_filters
         data = json.loads(request.data)
@@ -86,15 +93,18 @@ def configure_routes(app):
         return '', 204
     
     @app.route('/start_stream', methods=['POST'])
+    @login_required
     def start_stream():
         config.STREAM_ACTIVE = True
         return ('', 204)
 
     @app.route('/stop_stream', methods=['POST'])
+    @login_required
     def stop_stream():
         config.STREAM_ACTIVE = False
         return ('', 204)
     @app.route('/process_video', methods=['POST'])
+    @login_required
     def process_video():
         file = request.files.get('video_file')
         if not file or file.filename == '':
