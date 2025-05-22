@@ -92,6 +92,12 @@ def configure_routes(app):
         active_violation_filters = set(data.get('classes', VIOLATION_CLASSES))
         return '', 204
     
+    @app.route('/use_webcam', methods=['POST'])
+    @login_required
+    def use_webcam():
+        config.VIDEO_SOURCE = 0
+        return ('', 204)
+    
     @app.route('/start_stream', methods=['POST'])
     @login_required
     def start_stream():
@@ -103,6 +109,7 @@ def configure_routes(app):
     def stop_stream():
         config.STREAM_ACTIVE = False
         return ('', 204)
+    
     @app.route('/process_video', methods=['POST'])
     @login_required
     def process_video():

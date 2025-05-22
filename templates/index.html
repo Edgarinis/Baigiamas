@@ -113,47 +113,52 @@
   </div>
 
   <script>
-      // *** ensure streamRunning is defined ***
-      let streamRunning = false;
-
-      // Start: tell backend to set STREAM_ACTIVE=true, then inject <img src="/video_feed">
-      async function startWebcam() {
-          if (!streamRunning) {
-              await fetch('/start_stream', { method: 'POST' });
-              const container = document.getElementById('video-container');
-              container.innerHTML = '<img id="webcam-stream" src="/video_feed" />';
-              streamRunning = true;
-          }
+    let streamRunning = false;
+  
+    // Low-level: turn on streaming and show the <img>
+    async function startStream() {
+      await fetch('/start_stream', { method: 'POST' });
+      const container = document.getElementById('video-container');
+      container.innerHTML = '<img id="stream" src="/video_feed" />';
+      streamRunning = true;
+    }
+  
+    // Called by the "Start Webcam" button
+    async function startWebcam() {
+      if (!streamRunning) {
+        await fetch('/use_webcam', { method: 'POST' });  // switch to camera
+        await startStream();
       }
-
-      // Stop: tell backend to set STREAM_ACTIVE=false, then remove the <img>
-      async function stopWebcam() {
-          if (streamRunning) {
-              await fetch('/stop_stream', { method: 'POST' });
-              const container = document.getElementById('video-container');
-              container.innerHTML = 'Webcam feed will appear here';
-              streamRunning = false;
-          }
+    }
+  
+    // Called automatically when you upload a video
+    async function startVideo() {
+      if (!streamRunning) {
+        await startStream();  // leaves VIDEO_SOURCE pointing at your uploaded file
       }
+    }
+    async function stopWebcam() {
+  if (!streamRunning) return;               // nothing to do if already stopped
+  // 1) tell the backend to flip STREAM_ACTIVE off
+  await fetch('/stop_stream', { method: 'POST' });
 
-      // Violation‐filter toggles (unchanged)
-      const checkboxes = document.querySelectorAll('.violation-toggle');
-      checkboxes.forEach(cb => cb.addEventListener('change', () => {
-          const selected = Array.from(checkboxes)
-                                .filter(i => i.checked)
-                                .map(i => i.value);
-          fetch('/set_active_classes', {
-              method: 'POST',
-              headers: { 'Content-Type':'application/json' },
-              body: JSON.stringify({ classes: selected })
-          });
-      
-      }));
+  // 2) remove the <img> we injected for video_feed
+  const img = document.getElementById('stream');
+  if (img && img.parentNode) {
+    img.parentNode.removeChild(img);
+  }
 
+  // 3) restore the placeholder text
+  const container = document.getElementById('video-container');
+  container.textContent = 'Webcam feed will appear here';
+
+  // 4) reset our JS flag
+  streamRunning = false;
+}
   </script>
   {% if video_mode %}
   <script>
-    document.addEventListener('DOMContentLoaded', () => { startWebcam(); });
+    document.addEventListener('DOMContentLoaded', () => { startVideo(); });
   </script>
   {% endif %}
 </body>
