@@ -2,7 +2,6 @@ from ultralytics import YOLO
 import torch
 import os
 
-
 # print(torch.cuda.is_available())  # Check if CUDA is available
 # print(torch.cuda.get_device_name(0))  # Print the current CUDA device
 
@@ -12,7 +11,7 @@ import os
 
 def main():
     # Load the model (can be from .yaml or .pt file)
-    model = YOLO('yolov8s.yaml')  # or use 'yolov8n.pt' for pretrained
+    model = YOLO('yolov8m.pt')  # or use 'yolov8n.pt' for pretrained
 
     # Absolute path to your config (optional but safer)
     config_path = os.path.join(os.path.dirname(__file__), 'config.yaml')
@@ -20,13 +19,13 @@ def main():
     # Train using GPU (device=0)
     results = model.train(
     data=config_path,
-    epochs=60,
+    epochs=50,
     batch=16,
     imgsz=640,
     optimizer='AdamW',
     lr0=0.001,
     patience=15,
-    device=0
+    device=0,  # Use GPU
     augment=True
     )
 

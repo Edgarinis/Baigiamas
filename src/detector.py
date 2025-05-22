@@ -4,7 +4,7 @@ from src.db import log_violation
 from flask import current_app
 import numpy as np
 
-model = YOLO(r'C:\Users\cedga\Desktop\Baigiamas\runs\detect\train17\weights\best.pt')
+model = YOLO(r'C:\Users\cedga\Desktop\Baigiamas\runs\detect\train25\weights\best.pt')
 
 SNAPSHOT_DIR = os.path.join('static', 'snapshots')
 os.makedirs(SNAPSHOT_DIR, exist_ok=True)
