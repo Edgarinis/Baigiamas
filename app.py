@@ -20,24 +20,18 @@ app.config['RESULT_FOLDER'] = 'static/snapshots'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['RESULT_FOLDER'], exist_ok=True)
 
-# -----------------------------------------------------------------------------
-# 2) Initialize the database (violations, users, etc.)
-# -----------------------------------------------------------------------------
+#Initialize db, routes
 init_db()
+configure_routes(app)
 
-# -----------------------------------------------------------------------------
-# 3) Set up Flask-Login
-# -----------------------------------------------------------------------------
+# Set up Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login'  # redirect here if not logged in
-
+login_manager.login_view = 'login'  # redirect if @login_required
 
 @login_manager.user_loader
 def load_user(user_id):
-    """
-    Called by Flask-Login to load a user from the session.
-    """
+
     row = get_user_by_id(int(user_id))
     if not row:
         return None
@@ -47,15 +41,6 @@ def load_user(user_id):
     u.role     = row['role']
     return u
 
-# -----------------------------------------------------------------------------
-# 4) Register all your routes
-#    (these include your `/`, `/video_feed`, `/detect_image`,
-#     filter endpoints, and also `/login`, `/logout`, `/register`, etc.)
-# -----------------------------------------------------------------------------
-configure_routes(app)
 
-# -----------------------------------------------------------------------------
-# 5) Run the app
-# -----------------------------------------------------------------------------
 if __name__ == '__main__':
     app.run(debug=True)

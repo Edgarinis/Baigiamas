@@ -1,9 +1,9 @@
 from flask import render_template, Response, request, redirect, url_for, jsonify, current_app, flash
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import login_user, logout_user, login_required
 from src.detector import generate_frames
 from src.forms import RegistrationForm, LoginForm
 from config import User
-from src.db import verify_user, add_user, get_user_by_username, get_violations_summary, get_class_distribution, get_latest_violation, get_violations, log_violation
+from src.db import verify_user, add_user, get_violations_summary, get_class_distribution, get_latest_violation, get_violations, log_violation
 from ultralytics import YOLO
 import os, datetime, json, config
 
@@ -30,7 +30,7 @@ def configure_routes(app):
     @app.route('/video_feed')
     @login_required
     def video_feed():
-        return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+        return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame') #continuous stream
 
     @app.route('/violations')
     @login_required
@@ -57,12 +57,12 @@ def configure_routes(app):
         results[0].save(filename=res)
 
         # log first violation
-        for box in results[0].boxes.data.tolist():
+        for box in results[0].boxes.data.tolist(): #[x1, y1, x2, y2, conf, class id]
             cls, conf = int(box[5]), box[4]
             lbl = results[0].names[cls]
             if lbl in VIOLATION_CLASSES:
                 rel = os.path.relpath(res,'static').replace('\\','/')
-                log_violation(lbl, float(conf), rel)
+                log_violation(lbl, float(conf), rel) #log to db
                 break
 
         # re-gather dashboard
